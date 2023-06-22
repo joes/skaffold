@@ -59,12 +59,12 @@ type syncRunner struct {
 	opts       SyncEnvOpts
 }
 
-func (r syncRunner) RunPreHooks(ctx context.Context, out io.Writer) error {
-	return r.run(ctx, out, r.PreHooks, phases.PreSync)
+func (r syncRunner) RunPreHooks(ctx context.Context, in io.Reader, out io.Writer) error {
+	return r.run(ctx, in, out, r.PreHooks, phases.PreSync)
 }
 
-func (r syncRunner) RunPostHooks(ctx context.Context, out io.Writer) error {
-	return r.run(ctx, out, r.PostHooks, phases.PostSync)
+func (r syncRunner) RunPostHooks(ctx context.Context, in io.Reader, out io.Writer) error {
+	return r.run(ctx, in, out, r.PostHooks, phases.PostSync)
 }
 
 func (r syncRunner) getEnv() []string {
@@ -73,7 +73,7 @@ func (r syncRunner) getEnv() []string {
 	return append(common, sync...)
 }
 
-func (r syncRunner) run(ctx context.Context, out io.Writer, hooks []latest.SyncHookItem, phase phase) error {
+func (r syncRunner) run(ctx context.Context, in io.Reader, out io.Writer, hooks []latest.SyncHookItem, phase phase) error {
 	if len(hooks) > 0 {
 		output.Default.Fprintf(out, "Starting %s hooks for artifact %q...\n", phase, r.imageName)
 	}
@@ -81,7 +81,7 @@ func (r syncRunner) run(ctx context.Context, out io.Writer, hooks []latest.SyncH
 	for i, h := range hooks {
 		if h.HostHook != nil {
 			hook := hostHook{*h.HostHook, env}
-			if err := hook.run(ctx, out); err != nil {
+			if err := hook.run(ctx, in, out); err != nil {
 				return fmt.Errorf("failed to execute host %s hook %d for artifact %q: %w", phase, i+1, r.imageName, err)
 			}
 		} else if h.ContainerHook != nil {
@@ -92,7 +92,7 @@ func (r syncRunner) run(ctx context.Context, out io.Writer, hooks []latest.SyncH
 				namespaces: r.namespaces,
 				formatter:  r.formatter,
 			}
-			if err := hook.run(ctx, out); err != nil {
+			if err := hook.run(ctx, in, out); err != nil {
 				return fmt.Errorf("failed to execute container %s hook %d for artifact %q: %w", phase, i+1, r.imageName, err)
 			}
 		}

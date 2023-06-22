@@ -53,10 +53,12 @@ func (r RenderMux) Render(ctx context.Context, out io.Writer, artifacts []graph.
 
 	w, ctx := output.WithEventContext(ctx, out, constants.Render, constants.SubtaskIDNone)
 	for i := range r.gr.HookRunners {
-		if err := r.gr.HookRunners[i].RunPreHooks(ctx, w); err != nil {
+		if err := r.gr.HookRunners[i].RunPreHooks(ctx, nil, w); err != nil {
 			return manifest.ManifestListByConfig{}, err
 		}
 	}
+
+	allManifestReaders := []io.Reader{}
 
 	for i, renderer := range r.gr.Renderers {
 		eventV2.RendererInProgress(i)
@@ -74,6 +76,7 @@ func (r RenderMux) Render(ctx context.Context, out io.Writer, artifacts []graph.
 
 			if len(manifests) > 0 {
 				allManifests.Add(configName, manifests)
+				allManifestReaders = append(allManifestReaders, manifests.Reader())
 			}
 		}
 		eventV2.RendererSucceeded(i)
@@ -81,7 +84,7 @@ func (r RenderMux) Render(ctx context.Context, out io.Writer, artifacts []graph.
 	}
 	w, ctx = output.WithEventContext(ctx, out, constants.Render, constants.SubtaskIDNone)
 	for i := range r.gr.HookRunners {
-		if err := r.gr.HookRunners[i].RunPostHooks(ctx, w); err != nil {
+		if err := r.gr.HookRunners[i].RunPostHooks(ctx, io.MultiReader(allManifestReaders...), w); err != nil {
 			return manifest.ManifestListByConfig{}, err
 		}
 	}

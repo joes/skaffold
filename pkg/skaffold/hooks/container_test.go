@@ -110,7 +110,7 @@ func TestContainerRun(t *testing.T) {
 			}
 			var output bytes.Buffer
 
-			err := h.run(context.Background(), &output)
+			err := h.run(context.Background(), nil, &output)
 			t.CheckErrorAndDeepEqual(test.shouldErr, err, test.expected, output.String())
 		})
 	}

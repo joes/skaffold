@@ -1376,12 +1376,17 @@ func TestHelmHooks(t *testing.T) {
 
 			k, err := NewDeployer(context.Background(), &helmConfig{}, &label.DefaultLabeller{}, &testDeployConfig, nil, "default")
 			t.RequireNoError(err)
-			err = k.PreDeployHooks(context.Background(), io.Discard)
+			err = k.PreDeployHooks(context.Background(), nil, io.Discard)
 			t.CheckError(test.shouldErr, err)
-			err = k.PostDeployHooks(context.Background(), io.Discard)
+			err = k.PostDeployHooks(context.Background(), nil, io.Discard)
 			t.CheckError(test.shouldErr, err)
 		})
 	}
+}
+
+func getNilReader() io.Reader {
+	// Return your custom reader implementation here
+	return nil
 }
 
 type helmConfig struct {

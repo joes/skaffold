@@ -65,10 +65,10 @@ func TestRenderHooks(t *testing.T) {
 		runner := newRenderRunner(hooks, &namespaces, opts)
 		t.Override(&kubernetesclient.Client, fakeKubernetesClient)
 		var preOut, postOut bytes.Buffer
-		err := runner.RunPreHooks(context.Background(), &preOut)
+		err := runner.RunPreHooks(context.Background(), nil, &preOut)
 		t.CheckNoError(err)
 		t.CheckContains(preHostHookOut, preOut.String())
-		err = runner.RunPostHooks(context.Background(), &postOut)
+		err = runner.RunPostHooks(context.Background(), nil, &postOut)
 		t.CheckNoError(err)
 		t.CheckContains(postHostHookOut, postOut.String())
 	})

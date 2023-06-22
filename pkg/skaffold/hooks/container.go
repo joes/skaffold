@@ -89,7 +89,7 @@ type containerHook struct {
 }
 
 // run executes the lifecycle hook inside the target container
-func (h containerHook) run(ctx context.Context, out io.Writer) error {
+func (h containerHook) run(ctx context.Context, in io.Reader, out io.Writer) error {
 	errs, ctx := errgroup.WithContext(ctx)
 
 	client, err := kubernetesclient.Client(h.cli.KubeContext)

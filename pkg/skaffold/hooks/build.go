@@ -57,12 +57,12 @@ type buildRunner struct {
 	opts BuildEnvOpts
 }
 
-func (r buildRunner) RunPreHooks(ctx context.Context, out io.Writer) error {
-	return r.run(ctx, out, r.PreHooks, phases.PreBuild)
+func (r buildRunner) RunPreHooks(ctx context.Context, in io.Reader, out io.Writer) error {
+	return r.run(ctx, in, out, r.PreHooks, phases.PreBuild)
 }
 
-func (r buildRunner) RunPostHooks(ctx context.Context, out io.Writer) error {
-	return r.run(ctx, out, r.PostHooks, phases.PostBuild)
+func (r buildRunner) RunPostHooks(ctx context.Context, in io.Reader, out io.Writer) error {
+	return r.run(ctx, in, out, r.PostHooks, phases.PostBuild)
 }
 
 func (r buildRunner) getEnv() []string {
@@ -71,14 +71,14 @@ func (r buildRunner) getEnv() []string {
 	return append(common, build...)
 }
 
-func (r buildRunner) run(ctx context.Context, out io.Writer, hooks []latest.HostHook, phase phase) error {
+func (r buildRunner) run(ctx context.Context, in io.Reader, out io.Writer, hooks []latest.HostHook, phase phase) error {
 	if len(hooks) > 0 {
 		output.Default.Fprintln(out, fmt.Sprintf("Starting %s hooks...", phase))
 	}
 	env := r.getEnv()
 	for _, h := range hooks {
 		hook := hostHook{h, env}
-		if err := hook.run(ctx, out); err != nil {
+		if err := hook.run(ctx, in, out); err != nil {
 			return err
 		}
 	}

@@ -82,12 +82,13 @@ type deployRunner struct {
 	visitedContainers *sync.Map // maintain a list of previous iteration containers, so that they can be skipped
 }
 
-func (r deployRunner) RunPreHooks(ctx context.Context, out io.Writer) error {
-	return r.run(ctx, out, r.PreHooks, phases.PreDeploy)
+func (r deployRunner) RunPreHooks(ctx context.Context, in io.Reader, out io.Writer) error {
+	//Something, something in Reader to stdout from here...
+	return r.run(ctx, in, out, r.PreHooks, phases.PreDeploy)
 }
 
-func (r deployRunner) RunPostHooks(ctx context.Context, out io.Writer) error {
-	return r.run(ctx, out, r.PostHooks, phases.PostDeploy)
+func (r deployRunner) RunPostHooks(ctx context.Context, in io.Reader, out io.Writer) error {
+	return r.run(ctx, in, out, r.PostHooks, phases.PostDeploy)
 }
 
 func (r deployRunner) getEnv() []string {
@@ -96,7 +97,7 @@ func (r deployRunner) getEnv() []string {
 	return append(common, deploy...)
 }
 
-func (r deployRunner) run(ctx context.Context, out io.Writer, hooks []latest.DeployHookItem, phase phase) error {
+func (r deployRunner) run(ctx context.Context, in io.Reader, out io.Writer, hooks []latest.DeployHookItem, phase phase) error {
 	if len(hooks) > 0 {
 		output.Default.Fprintln(out, fmt.Sprintf("Starting %s hooks...", phase))
 	}
@@ -104,7 +105,7 @@ func (r deployRunner) run(ctx context.Context, out io.Writer, hooks []latest.Dep
 	for _, h := range hooks {
 		if h.HostHook != nil {
 			hook := hostHook{*h.HostHook, env}
-			if err := hook.run(ctx, out); err != nil {
+			if err := hook.run(ctx, in, out); err != nil {
 				return err
 			}
 		} else if h.ContainerHook != nil {
@@ -115,7 +116,7 @@ func (r deployRunner) run(ctx context.Context, out io.Writer, hooks []latest.Dep
 				namespaces: *r.namespaces,
 				formatter:  r.formatter,
 			}
-			if err := hook.run(ctx, out); err != nil {
+			if err := hook.run(ctx, in, out); err != nil {
 				return err
 			}
 		}

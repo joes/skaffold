@@ -148,10 +148,10 @@ func TestBuildHooks(t *testing.T) {
 			t.CheckNoError(err)
 			runner := BuildRunner(test.artifact.LifecycleHooks, opts)
 			var preOut, postOut bytes.Buffer
-			err = runner.RunPreHooks(context.Background(), &preOut)
+			err = runner.RunPreHooks(context.Background(), nil, &preOut)
 			t.CheckNoError(err)
 			t.CheckContains(test.preHookOut, preOut.String())
-			err = runner.RunPostHooks(context.Background(), &postOut)
+			err = runner.RunPostHooks(context.Background(), nil, &postOut)
 			t.CheckNoError(err)
 			t.CheckContains(test.postHookOut, postOut.String())
 		})

@@ -24,9 +24,9 @@ import (
 // Runner represents a lifecycle hooks runner
 type Runner interface {
 	// RunPreHooks executes all pre-step hooks defined by the `Runner`
-	RunPreHooks(ctx context.Context, out io.Writer) error
+	RunPreHooks(ctx context.Context, in io.Reader, out io.Writer) error
 	// RunPostHooks executes all post-step hooks defined by the `Runner`
-	RunPostHooks(ctx context.Context, out io.Writer) error
+	RunPostHooks(ctx context.Context, in io.Reader, out io.Writer) error
 }
 
 type phase string
@@ -57,14 +57,14 @@ type MockRunner struct {
 	PostHooks func(ctx context.Context, out io.Writer) error
 }
 
-func (m MockRunner) RunPreHooks(ctx context.Context, out io.Writer) error {
+func (m MockRunner) RunPreHooks(ctx context.Context, in io.Reader, out io.Writer) error {
 	if m.PreHooks != nil {
 		return m.PreHooks(ctx, out)
 	}
 	return nil
 }
 
-func (m MockRunner) RunPostHooks(ctx context.Context, out io.Writer) error {
+func (m MockRunner) RunPostHooks(ctx context.Context, in io.Reader, out io.Writer) error {
 	if m.PostHooks != nil {
 		return m.PostHooks(ctx, out)
 	}

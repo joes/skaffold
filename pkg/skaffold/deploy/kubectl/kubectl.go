@@ -277,9 +277,9 @@ func (k *Deployer) HasRunnableHooks() bool {
 	return len(k.KubectlDeploy.LifecycleHooks.PreHooks) > 0 || len(k.KubectlDeploy.LifecycleHooks.PostHooks) > 0
 }
 
-func (k *Deployer) PreDeployHooks(ctx context.Context, out io.Writer) error {
+func (k *Deployer) PreDeployHooks(ctx context.Context, in io.Reader, out io.Writer) error {
 	childCtx, endTrace := instrumentation.StartTrace(ctx, "Deploy_PreHooks")
-	if err := k.hookRunner.RunPreHooks(childCtx, out); err != nil {
+	if err := k.hookRunner.RunPreHooks(childCtx, in, out); err != nil {
 		endTrace(instrumentation.TraceEndError(err))
 		return err
 	}
@@ -287,9 +287,9 @@ func (k *Deployer) PreDeployHooks(ctx context.Context, out io.Writer) error {
 	return nil
 }
 
-func (k *Deployer) PostDeployHooks(ctx context.Context, out io.Writer) error {
+func (k *Deployer) PostDeployHooks(ctx context.Context, in io.Reader, out io.Writer) error {
 	childCtx, endTrace := instrumentation.StartTrace(ctx, "Deploy_PostHooks")
-	if err := k.hookRunner.RunPostHooks(childCtx, out); err != nil {
+	if err := k.hookRunner.RunPostHooks(childCtx, in, out); err != nil {
 		endTrace(instrumentation.TraceEndError(err))
 		return err
 	}

@@ -50,12 +50,12 @@ type renderRunner struct {
 	visitedContainers *sync.Map // maintain a list of previous iteration containers, so that they can be skipped
 }
 
-func (r renderRunner) RunPreHooks(ctx context.Context, out io.Writer) error {
-	return r.run(ctx, out, r.PreHooks, phases.PreRender)
+func (r renderRunner) RunPreHooks(ctx context.Context, in io.Reader, out io.Writer) error {
+	return r.run(ctx, in, out, r.PreHooks, phases.PreRender)
 }
 
-func (r renderRunner) RunPostHooks(ctx context.Context, out io.Writer) error {
-	return r.run(ctx, out, r.PostHooks, phases.PostRender)
+func (r renderRunner) RunPostHooks(ctx context.Context, in io.Reader, out io.Writer) error {
+	return r.run(ctx, in, out, r.PostHooks, phases.PostRender)
 }
 
 func (r renderRunner) getEnv() []string {
@@ -64,7 +64,7 @@ func (r renderRunner) getEnv() []string {
 	return append(common, render...)
 }
 
-func (r renderRunner) run(ctx context.Context, out io.Writer, hooks []latest.RenderHookItem, phase phase) error {
+func (r renderRunner) run(ctx context.Context, in io.Reader, out io.Writer, hooks []latest.RenderHookItem, phase phase) error {
 	if len(hooks) > 0 {
 		output.Default.Fprintln(out, fmt.Sprintf("Starting %s hooks...", phase))
 	}
@@ -72,7 +72,7 @@ func (r renderRunner) run(ctx context.Context, out io.Writer, hooks []latest.Ren
 	for _, h := range hooks {
 		if h.HostHook != nil {
 			hook := hostHook{*h.HostHook, env}
-			if err := hook.run(ctx, out); err != nil {
+			if err := hook.run(ctx, in, out); err != nil {
 				return err
 			}
 		}

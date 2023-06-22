@@ -45,8 +45,8 @@ type DeployerMux struct {
 
 type deployerWithHooks interface {
 	HasRunnableHooks() bool
-	PreDeployHooks(context.Context, io.Writer) error
-	PostDeployHooks(context.Context, io.Writer) error
+	PreDeployHooks(context.Context, io.Reader, io.Writer) error
+	PostDeployHooks(context.Context, io.Reader, io.Writer) error
 }
 
 func NewDeployerMux(deployers []Deployer, iterativeStatusCheck bool) Deployer {
@@ -126,7 +126,16 @@ func (m DeployerMux) Deploy(ctx context.Context, w io.Writer, as []graph.Artifac
 			runHooks = deployHooks.HasRunnableHooks()
 		}
 		if runHooks {
-			if err := deployHooks.PreDeployHooks(ctx, w); err != nil {
+			allManifestReaders := []io.Reader{}
+			for _, configName := range l.ConfigNames() {
+				manifests := l.GetForConfig(configName)
+
+				if len(manifests) > 0 {
+					allManifestReaders = append(allManifestReaders, manifests.Reader())
+				}
+			}
+
+			if err := deployHooks.PreDeployHooks(ctx, io.MultiReader(allManifestReaders...), w); err != nil {
 				return err
 			}
 		}
@@ -145,7 +154,16 @@ func (m DeployerMux) Deploy(ctx context.Context, w io.Writer, as []graph.Artifac
 			}
 		}
 		if runHooks {
-			if err := deployHooks.PostDeployHooks(ctx, w); err != nil {
+			allManifestReaders := []io.Reader{}
+			for _, configName := range l.ConfigNames() {
+				manifests := l.GetForConfig(configName)
+
+				if len(manifests) > 0 {
+					allManifestReaders = append(allManifestReaders, manifests.Reader())
+				}
+			}
+
+			if err := deployHooks.PostDeployHooks(ctx, io.MultiReader(allManifestReaders...), w); err != nil {
 				return err
 			}
 		}

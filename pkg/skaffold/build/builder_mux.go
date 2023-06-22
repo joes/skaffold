@@ -101,7 +101,7 @@ func (b *BuilderMux) Build(ctx context.Context, out io.Writer, tags tag.ImageTag
 			return "", err
 		}
 		r := hooks.BuildRunner(artifact.LifecycleHooks, hooksOpts)
-		if err = r.RunPreHooks(ctx, out); err != nil {
+		if err = r.RunPreHooks(ctx, nil, out); err != nil {
 			return "", err
 		}
 		var built string
@@ -124,7 +124,7 @@ func (b *BuilderMux) Build(ctx context.Context, out io.Writer, tags tag.ImageTag
 			log.Entry(ctx).Warnf("error adding artifact to cache; caching may not work as expected: %v", err)
 		}
 
-		if err = r.RunPostHooks(ctx, out); err != nil {
+		if err = r.RunPostHooks(ctx, nil, out); err != nil {
 			return "", err
 		}
 

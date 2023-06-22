@@ -403,9 +403,9 @@ func (h *Deployer) HasRunnableHooks() bool {
 	return len(h.LegacyHelmDeploy.LifecycleHooks.PreHooks) > 0 || len(h.LegacyHelmDeploy.LifecycleHooks.PostHooks) > 0
 }
 
-func (h *Deployer) PreDeployHooks(ctx context.Context, out io.Writer) error {
+func (h *Deployer) PreDeployHooks(ctx context.Context, in io.Reader, out io.Writer) error {
 	childCtx, endTrace := instrumentation.StartTrace(ctx, "Deploy_PreHooks")
-	if err := h.hookRunner.RunPreHooks(childCtx, out); err != nil {
+	if err := h.hookRunner.RunPreHooks(childCtx, in, out); err != nil {
 		endTrace(instrumentation.TraceEndError(err))
 		return err
 	}
@@ -413,9 +413,9 @@ func (h *Deployer) PreDeployHooks(ctx context.Context, out io.Writer) error {
 	return nil
 }
 
-func (h *Deployer) PostDeployHooks(ctx context.Context, out io.Writer) error {
+func (h *Deployer) PostDeployHooks(ctx context.Context, in io.Reader, out io.Writer) error {
 	childCtx, endTrace := instrumentation.StartTrace(ctx, "Deploy_PostHooks")
-	if err := h.hookRunner.RunPostHooks(childCtx, out); err != nil {
+	if err := h.hookRunner.RunPostHooks(childCtx, in, out); err != nil {
 		endTrace(instrumentation.TraceEndError(err))
 		return err
 	}

@@ -106,11 +106,11 @@ func TestSyncHooks(t *testing.T) {
 				AndRunWithOutput("kubectl --context context1 exec pod1 --namespace np1 -c container1 -- foo post-hook", postContainerHookOut))
 		t.Override(&kubernetesclient.Client, fakeKubernetesClient)
 		var preOut, postOut bytes.Buffer
-		err = runner.RunPreHooks(context.Background(), &preOut)
+		err = runner.RunPreHooks(context.Background(), nil, &preOut)
 		t.CheckNoError(err)
 		t.CheckContains(preHostHookOut, preOut.String())
 		t.CheckContains(preContainerHookOut, strings.TrimRight(preOut.String(), "\r\n"))
-		err = runner.RunPostHooks(context.Background(), &postOut)
+		err = runner.RunPostHooks(context.Background(), nil, &postOut)
 		t.CheckNoError(err)
 		t.CheckContains(postHostHookOut, postOut.String())
 		t.CheckContains(postContainerHookOut, postOut.String())

@@ -85,7 +85,7 @@ func TestRun(t *testing.T) {
 				t.Skip()
 			}
 			var buf bytes.Buffer
-			err := test.hook.run(context.Background(), &buf)
+			err := test.hook.run(context.Background(), nil, &buf)
 			t.CheckNoError(err)
 			t.CheckDeepEqual(test.expected, buf.String())
 		})

@@ -155,9 +155,9 @@ func (d *Deployer) HasRunnableHooks() bool {
 	return len(d.CloudRunDeploy.LifecycleHooks.PreHooks) > 0 || len(d.CloudRunDeploy.LifecycleHooks.PostHooks) > 0
 }
 
-func (d *Deployer) PreDeployHooks(ctx context.Context, out io.Writer) error {
+func (d *Deployer) PreDeployHooks(ctx context.Context, in io.Reader, out io.Writer) error {
 	childCtx, endTrace := instrumentation.StartTrace(ctx, "Deploy_PreHooks")
-	if err := d.hookRunner.RunPreHooks(childCtx, out); err != nil {
+	if err := d.hookRunner.RunPreHooks(childCtx, in, out); err != nil {
 		endTrace(instrumentation.TraceEndError(err))
 		return err
 	}
@@ -167,7 +167,7 @@ func (d *Deployer) PreDeployHooks(ctx context.Context, out io.Writer) error {
 
 func (d *Deployer) PostDeployHooks(ctx context.Context, out io.Writer) error {
 	childCtx, endTrace := instrumentation.StartTrace(ctx, "Deploy_PostHooks")
-	if err := d.hookRunner.RunPostHooks(childCtx, out); err != nil {
+	if err := d.hookRunner.RunPostHooks(childCtx, nil, out); err != nil {
 		endTrace(instrumentation.TraceEndError(err))
 		return err
 	}
